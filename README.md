@@ -5,14 +5,23 @@ This file contains experiment code on Deep Neural Network and Reinforcement Lear
 # assistRL
 This is the code about using assistSGD on Reinforcement Learning senario. 
 To run the code, you need to use conda to install some packages, including:
+
 conda install -c conda-forge gym
+
 conda install -c conda-forge gym-recording
+
 conda install -c pytorch pytorch
+
 conda install -c conda-forge box2d-py
+
 conda install -c conda-forge ffmpeg
+
 conda install -c conda-forge pyglet
+
 conda install tensorboard
+
 conda install -c conda-forge asciinema
+
 conda install -c conda-forge gym=0.17.3 (If the video cannot be played, try this package)
 
 # Lunarlander_V2.py
