@@ -25,7 +25,7 @@ record = args.record
 reward_threshold = args.reward_threshold
 print('record is ', record)
 class Params:
-    EPOCH_SIZE_IN_EACH_COMMUNICATION = 8  # How many epochs we want to pack when transferring parameters
+    EPOCH_SIZE_IN_EACH_TRAJECTORY = 8  # How many epochs we want to pack when transferring parameters
     EPOCH_SIZE_IN_SHARE = 4    # How many parameters will be shared during each assistance
     ALPHA = 5e-3        # learning rate
     EPISODE_SIZE_IN_EACH_EPOCH = 8   # how many episodes we want to pack into an epoch
@@ -65,11 +65,11 @@ class PolicyGradient:
     def __init__(self, environment: str = "CartPole", use_cuda: bool = False, height_level=0.25,LEG_SPRING_TORQUE=40, map_prob=1, map_n=10, msg1=None, msg2=None):
 
         self.ALPHA = Params.ALPHA
-        self.BATCH_SIZE = Params.EPISODE_SIZE_IN_EACH_EPOCH
+        self.EPISODE_SIZE_IN_EACH_EPOCH = Params.EPISODE_SIZE_IN_EACH_EPOCH
         self.GAMMA = Params.GAMMA
         self.HIDDEN_SIZE = Params.HIDDEN_SIZE
         self.BETA = Params.BETA
-        self.EPOCH_SIZE_IN_EACH_COMMUNICATION = Params.EPOCH_SIZE_IN_EACH_COMMUNICATION
+        self.EPOCH_SIZE_IN_EACH_TRAJECTORY = Params.EPOCH_SIZE_IN_EACH_TRAJECTORY
         self.EPOCH_SIZE_IN_SHARE = Params.EPOCH_SIZE_IN_SHARE
         self.reward_threshold = Params.reward_threshold
         # self.DEVICE = torch.device('cuda' if torch.cuda.is_available() and use_cuda else 'cpu')
@@ -121,10 +121,10 @@ class PolicyGradient:
         if self.record:
             provider.env = wrappers.Monitor(provider.env, './arl_video/' + self.msg1 + '/' + self.msg2+'_on_' + provider.msg2, video_callable=lambda episode_id: True,
                                    force=True)
-        while epoch < self.EPOCH_SIZE_IN_EACH_COMMUNICATION:
+        while epoch < self.EPOCH_SIZE_IN_EACH_TRAJECTORY:
             epoch_logits = torch.empty(size=(0, self.env.action_space.n), device=self.DEVICE)
             epoch_weighted_log_probs = torch.empty(size=(0,), dtype=torch.float, device=self.DEVICE)
-            while episode < self.BATCH_SIZE:
+            while episode < self.EPISODE_SIZE_IN_EACH_EPOCH:
                 # play an episode of the environment
 
                 (episode_weighted_log_prob_trajectory,
@@ -220,10 +220,10 @@ class PolicyGradient:
             if assist_round % 10 == 0:
                 self.env = wrappers.Monitor(self.env, './arl_video/' + self.msg1 + '/'+ self.msg2 + '/'+ str(assist_round), video_callable=lambda episode_id: True,
                                        force=True)
-        while epoch < self.EPOCH_SIZE_IN_EACH_COMMUNICATION:
+        while epoch < self.EPOCH_SIZE_IN_EACH_TRAJECTORY:
             epoch_logits = torch.empty(size=(0, self.env.action_space.n), device=self.DEVICE)
             epoch_weighted_log_probs = torch.empty(size=(0,), dtype=torch.float, device=self.DEVICE)
-            while episode < self.BATCH_SIZE:
+            while episode < self.EPISODE_SIZE_IN_EACH_EPOCH:
 
                 # play an episode of the environment
                 if epoch == 0:
@@ -282,7 +282,7 @@ class PolicyGradient:
             self.adam.step()
 
             # feedback
-            print("\r", f"Epoch: {epoch + self.BATCH_num * self.EPOCH_SIZE_IN_EACH_COMMUNICATION}, Avg Return per Epoch: {np.mean(self.total_rewards):.3f}",
+            print("\r", f"Epoch: {epoch + self.BATCH_num * self.EPOCH_SIZE_IN_EACH_TRAJECTORY}, Avg Return per Epoch: {np.mean(self.total_rewards):.3f}",
                   end="",
                   flush=True)
 
@@ -345,7 +345,7 @@ class PolicyGradient:
         while True:
             epoch_logits = torch.empty(size=(0, self.env.action_space.n), device=self.DEVICE)
             epoch_weighted_log_probs = torch.empty(size=(0,), dtype=torch.float, device=self.DEVICE)
-            while episode < self.BATCH_SIZE:
+            while episode < self.EPISODE_SIZE_IN_EACH_EPOCH:
                 # play an episode of the environment
 
                 (episode_weighted_log_prob_trajectory,
@@ -395,7 +395,7 @@ class PolicyGradient:
             self.adam.step()
 
             # feedback
-            print("\r", f"Epoch: {epoch + self.BATCH_num * self.EPOCH_SIZE_IN_EACH_COMMUNICATION}, Avg Return per Epoch: {np.mean(self.total_rewards):.3f}",
+            print("\r", f"Epoch: {epoch + self.BATCH_num * self.EPOCH_SIZE_IN_EACH_TRAJECTORY}, Avg Return per Epoch: {np.mean(self.total_rewards):.3f}",
                   end="",
                   flush=True)
 
